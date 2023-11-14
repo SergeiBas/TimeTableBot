@@ -1,0 +1,224 @@
+package telegrambot;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import usersettings.ChatBotSettings;
+import usersettings.Utils;
+
+import java.util.*;
+
+public class MyTelegramBot extends TelegramLongPollingBot {
+    public static Logger logger = LoggerFactory.getLogger(MyTelegramBot.class);
+
+    private static final Map<Long, ChatBotSettings> settings = new HashMap<>();
+
+    public static Map<Long, ChatBotSettings> getSettings() {
+        return settings;
+    }
+
+    @Override
+    public void onUpdateReceived(Update update) {
+        if (update.hasMessage()) {
+            Message message = update.getMessage();
+            Long chatId = update.getMessage().getChatId();
+            Utils.updateSettings(chatId);
+
+            if (message.hasText()) {
+                String text = message.getText();
+                SendMessage sendMessage = new SendMessage();
+
+                sendMessage.setChatId(String.valueOf(chatId));
+
+                switch (text) {
+                    case "/start" -> sendNextMessage(new TelegramBotUtils().sendHelloMessage(chatId));
+                    case "Отримати розклад" -> {
+                        //sendMessage.setText(Utils.getCurrentData(settings.get(chatId)));
+                        sendNextMessage(sendMessage);
+                    }
+                    case "Налаштування" -> new SettingsKeyboardsUtils().sendChoiceOptionsMessage(sendMessage);
+                    case "/end" -> sendNextMessage(new TelegramBotUtils().sendEndMessage(chatId));
+                    case "/settings" ->
+                            sendNextMessage(new TelegramBotUtils().sendCurrentSettingsMessage(chatId, settings.get(chatId)));
+                    default -> {
+                        sendMessage.setText("Немає обробки тексту " + text);
+                        sendNextMessage(sendMessage);
+                    }
+                }
+            }
+        } else if (update.hasCallbackQuery()) {
+            Long chatId = update.getCallbackQuery().getMessage().getChatId();
+            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+
+            Utils.updateSettings(chatId);
+
+            String inputQueryMessage = String.valueOf(update.getCallbackQuery().getData());
+
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(chatId);
+
+            EditMessageReplyMarkup editMessage = new EditMessageReplyMarkup();
+            editMessage.setChatId(chatId);
+            editMessage.setMessageId(messageId);
+
+            AnswerCallbackQuery answerCallbackQuery = new AnswerCallbackQuery(update.getCallbackQuery().getId());
+
+            switch (inputQueryMessage) {
+                case ("bank") -> BankMenu.sendChoiceBankMessage(sendMessage, settings.get(chatId));
+                case ("decimals") -> DecimalMenu.sendChoiceDecimalsMessage(sendMessage, settings.get(chatId));
+                case ("currencies") -> CurrencyMenu.sendChoiceCurrenciesMessage(sendMessage, settings.get(chatId));
+                case ("USD"), ("EUR") -> {
+                    List<Currencies> choicesCurrenciesNow = new ArrayList<>(settings.get(chatId).getChoicesCurrencies());
+                    Currencies newCurrency = Currencies.valueOf(inputQueryMessage);
+
+                    if (choicesCurrenciesNow.contains(newCurrency)) {
+                        if (choicesCurrenciesNow.size() > 1) {
+                            choicesCurrenciesNow.remove(newCurrency);
+                        }
+                    } else {
+                        choicesCurrenciesNow.add(newCurrency);
+                    }
+
+                    boolean isNewSetting = SettingsKeyboardsUtils.isThisNewSetting(choicesCurrenciesNow.toString(), settings.get(chatId));
+                    new SettingsKeyboardsUtils().sendAnswerCallbackQuery(answerCallbackQuery, isNewSetting);
+
+                    if (isNewSetting) {
+                        settings.get(chatId).setChoicesCurrencies(choicesCurrenciesNow);
+                        editMessage.setReplyMarkup(CurrencyMenu.getChoiceCurrenciesKeyBoard(settings.get(chatId)));
+                        sendNextEditMessage(editMessage);
+                        SettingUtils.writeUserSettings(settings.get(chatId));
+                    }
+                }
+                case ("2"), ("3"), ("4") -> {
+                    boolean isNewSetting = SettingsKeyboardsUtils.isThisNewSetting(inputQueryMessage, settings.get(chatId));
+                    new SettingsKeyboardsUtils().sendAnswerCallbackQuery(answerCallbackQuery, isNewSetting);
+                    settings.get(chatId).setNumberOfDecimal(Integer.parseInt(inputQueryMessage));
+
+                    if (isNewSetting) {
+                        editMessage.setReplyMarkup(DecimalMenu.getChoiceDecimalsKeyBoard(settings.get(chatId)));
+                        sendNextEditMessage(editMessage);
+                        SettingUtils.writeUserSettings(settings.get(chatId));
+                    }
+                }
+                case ("NBUBank"), ("PrivatBank"), ("MonoBank") -> {
+                    List<String> choicesBanksNow = new ArrayList<>(settings.get(chatId).getBanks());
+                    String newBank = inputQueryMessage;
+
+                    if (choicesBanksNow.contains(newBank)) {
+                        if (choicesBanksNow.size() > 1) {
+                            choicesBanksNow.remove(newBank);
+                        }
+                    } else {
+                        choicesBanksNow.add(newBank);
+                    }
+
+                    boolean isNewSetting = SettingsKeyboardsUtils.isThisNewSetting(choicesBanksNow.toString(), settings.get(chatId));
+                    new SettingsKeyboardsUtils().sendAnswerCallbackQuery(answerCallbackQuery, isNewSetting);
+
+                    if (isNewSetting) {
+                        settings.get(chatId).setBanks(choicesBanksNow);
+                        editMessage.setReplyMarkup(BankMenu.getChoiceBankKeyBoard(settings.get(chatId)));
+                        sendNextEditMessage(editMessage);
+                        SettingUtils.writeUserSettings(settings.get(chatId));
+                    }
+                }
+                case ("reminders") -> RemindersMenu.sendChoiceReminderMessage(sendMessage, settings.get(chatId));
+                case ("9"), ("10"), ("11"), ("12"), ("13"), ("14"), ("15"), ("16"), ("17"), ("18") -> {
+                    List<Integer> choicesReminderHoursNow = new LinkedList<>(settings.get(chatId).getReminderHours());
+                    Integer newReminder = Integer.valueOf(inputQueryMessage);
+
+                    if (choicesReminderHoursNow.contains(newReminder)) {
+                        if (choicesReminderHoursNow.size() > 1) {
+                            choicesReminderHoursNow.remove(newReminder);
+
+                            Reminder.stopTimer(newReminder.toString(), chatId);
+                        }
+
+                    } else {
+                        if (choicesReminderHoursNow.size() > 4) {
+                            Reminder.stopTimer(choicesReminderHoursNow.get(0).toString(), chatId);
+                            choicesReminderHoursNow.remove(0);
+                        }
+                        choicesReminderHoursNow.add(newReminder);
+
+                        Reminder.startTimer(inputQueryMessage, chatId);
+                    }
+
+
+                    boolean isNewSetting = SettingsKeyboardsUtils.isThisNewSetting(choicesReminderHoursNow.toString(), settings.get(chatId));
+                    new SettingsKeyboardsUtils().sendAnswerCallbackQuery(answerCallbackQuery, isNewSetting);
+
+                    if (!settings.get(chatId).isReminderStarted()) {
+                        settings.get(chatId).setReminderStarted(true);
+                    }
+
+                    if (isNewSetting) {
+                        settings.get(chatId).setReminderHours(choicesReminderHoursNow);
+                        editMessage.setReplyMarkup(RemindersMenu.getChoiceReminderKeyBoard(settings.get(chatId)));
+                        sendNextEditMessage(editMessage);
+                        SettingUtils.writeUserSettings(settings.get(chatId));
+                    }
+                }
+                case ("OffReminder") -> {
+                    boolean isNewSetting = SettingsKeyboardsUtils.isThisNewSetting("false", settings.get(chatId));
+
+                    new SettingsKeyboardsUtils().sendAnswerCallbackQuery(answerCallbackQuery, isNewSetting);
+
+                    if (isNewSetting) {
+                        Reminder.stopAllTimers(settings.get(chatId).getReminderHours(), chatId);
+                        settings.get(chatId).setReminderStarted(false);
+                        settings.get(chatId).getReminderHours().clear();
+
+                        editMessage.setReplyMarkup(RemindersMenu.getChoiceReminderKeyBoard(settings.get(chatId)));
+                        sendNextEditMessage(editMessage);
+                        SettingUtils.writeUserSettings(settings.get(chatId));
+                    }
+                }
+                default -> {
+                    sendMessage.setText("Немає обробки цієї кнопки: " + update.getCallbackQuery().getData());
+                    sendNextMessage(sendMessage);
+                }
+            }
+        }
+    }
+
+    public void sendNextMessage(SendMessage message) {
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            logger.error("Error sending message", e);
+        }
+    }
+
+    public void sendNextQuery(AnswerCallbackQuery answerCallbackQuery) {
+        try {
+            execute(answerCallbackQuery);
+        } catch (TelegramApiException e) {
+            logger.error("Error sending query", e);
+        }
+    }
+
+    public void sendNextEditMessage(EditMessageReplyMarkup editMessage) {
+        try {
+            execute(editMessage);
+        } catch (TelegramApiException e) {
+            logger.error("Error editing message", e);
+        }
+    }
+
+    @Override
+    public String getBotUsername() {
+        return MyTelegramBotConst.MY_TEL_BOT_NAME;
+    }
+
+    @Override
+    public String getBotToken() {
+        return MyTelegramBotConst.MY_TEL_BOT_TOKEN;
+    }
+}
