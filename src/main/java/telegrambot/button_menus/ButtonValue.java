@@ -1,4 +1,4 @@
-package telegrambot.buttonmenus;
+package telegrambot.button_menus;
 
 import lombok.Data;
 

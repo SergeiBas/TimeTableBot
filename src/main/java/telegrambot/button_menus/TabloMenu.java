@@ -1,14 +1,15 @@
-package telegrambot.buttonmenus;
+package telegrambot.button_menus;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import ua.goit.telegrambot.KeyboardBuilder;
-import ua.goit.telegrambot.MyTelBot;
-import ua.goit.userssetting.ChatBotSettings;
+import telegrambot.MyTelegramBot;
+import telegrambot.KeyboardBuilder;
+import telegrambot.MyTelegramBot;
+import user_settings.ChatBotSettings;
 
 import java.util.List;
 
-public class RemindersMenu {
+public class TabloMenu {
 
     public static InlineKeyboardMarkup getChoiceReminderKeyBoard(ChatBotSettings userSettings) {
         List<Integer> reminderTime = userSettings.getReminderHours();
@@ -36,6 +37,6 @@ public class RemindersMenu {
         sendMessage.setText("Оберіть час сповіщень (не більше 5):");
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
 
-        new MyTelBot().sendNextMessage(sendMessage);
+        new MyTelegramBot().sendNextMessage(sendMessage);
     }
 }

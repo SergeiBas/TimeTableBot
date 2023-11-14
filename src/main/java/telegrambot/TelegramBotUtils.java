@@ -15,7 +15,7 @@ public class TelegramBotUtils {
         ReplyKeyboardMarkup replyKeyboardMarkup = getDefaultKeyBoard();
 
         sendMessage.setChatId(chatId);
-        sendMessage.setText("Ласкаво просимо. Цей бот допоможе відслідковувати актуальні курси валют");
+        sendMessage.setText("Ласкаво просимо. Цей бот допоможе відслідковувати актуальні gay party");
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
         return sendMessage;
     }
@@ -23,7 +23,7 @@ public class TelegramBotUtils {
     public SendMessage sendEndMessage(long chatId) {
         SendMessage sendEndMessage = new SendMessage();
         sendEndMessage.setChatId(chatId);
-        sendEndMessage.setText("До зустрічі!");
+        sendEndMessage.setText("До зустрічі! До нових gay party.");
 
         return sendEndMessage;
     }
@@ -34,7 +34,7 @@ public class TelegramBotUtils {
         List<KeyboardRow> keyboard = new ArrayList<>();
 
         KeyboardRow row1 = new KeyboardRow();
-        KeyboardButton button1 = new KeyboardButton("Отримати інфо");
+        KeyboardButton button1 = new KeyboardButton("Отримати розклад");
         row1.add(button1);
 
         KeyboardRow row2 = new KeyboardRow();
@@ -49,32 +49,18 @@ public class TelegramBotUtils {
         return replyKeyboardMarkup;
     }
 
-    private static String getString(List<String> list) {
+    private static String getStringGroups(List<String> list) {
         StringBuilder result = new StringBuilder();
 
-        for (String oneBank : list) {
-            Banks bank = BankFactory.getBank(oneBank);
-
-            if (!result.isEmpty()) {
-                result.append(", ");
-            }
-
-            result.append(bank.getName());
-        }
-
-        return result.toString();
-    }
-
-    private static String getStringCurrency(List<Currencies> list) {
-        StringBuilder result = new StringBuilder();
-
-        for (Currencies oneCurrency : list) {
-            if (!result.isEmpty()) {
-                result.append(", ");
-            }
-
-            result.append(oneCurrency.toString());
-        }
+//        for (String oneBank : list) {
+//            Banks bank = BankFactory.getBank(oneBank);
+//
+//            if (!result.isEmpty()) {
+//                result.append(", ");
+//            }
+//
+//            result.append(bank.getName());
+//        }
 
         return result.toString();
     }
