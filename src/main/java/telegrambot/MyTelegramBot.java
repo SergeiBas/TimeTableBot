@@ -41,10 +41,8 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                         sendMessage.setText(Utils.getCurrentData(settings.get(chatId)));
                         sendNextMessage(sendMessage);
                     }
-                    case "Налаштування" -> new SettingsKeyboardsUtils().sendChoiceOptionsMessage(sendMessage);
+                    case "Налаштування", "/settings" -> new SettingsKeyboardsUtils().sendChoiceOptionsMessage(sendMessage);
                     case "/end" -> sendNextMessage(new TelegramBotUtils().sendEndMessage(chatId));
-//                    case "/settings" ->
-//                            sendNextMessage(new TelegramBotUtils().sendCurrentSettingsMessage(chatId, settings.get(chatId)));
                     default -> {
                         sendMessage.setText("Немає обробки тексту " + text);
                         sendNextMessage(sendMessage);
@@ -72,7 +70,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                 case("group") -> TabloMenu.sendChoiceGroupMessage(sendMessage, settings.get(chatId));
                 case("KS231"), ("KS232"), ("KN23"), ("KI23"), ("KT23"), ("KS22"), ("KN22"), ("KI22"), ("KT22") ->{
 
-                    boolean isNewSetting = SettingsKeyboardsUtils.isThisNewSetting(inputQueryMessage.toString(), settings.get(chatId));
+                    boolean isNewSetting = SettingsKeyboardsUtils.isThisNewSetting(inputQueryMessage, settings.get(chatId));
                     new SettingsKeyboardsUtils().sendAnswerCallbackQuery(answerCallbackQuery, isNewSetting);
 
                     if (isNewSetting) {
