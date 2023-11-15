@@ -4,37 +4,33 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import telegrambot.MyTelegramBot;
 import telegrambot.KeyboardBuilder;
-import telegrambot.MyTelegramBot;
 import user_settings.ChatBotSettings;
 
 import java.util.List;
 
 public class TabloMenu {
 
-    public static InlineKeyboardMarkup getChoiceReminderKeyBoard(ChatBotSettings userSettings) {
-        List<Integer> reminderTime = userSettings.getReminderHours();
-        boolean reminderStarted = userSettings.isReminderStarted();
+    public static InlineKeyboardMarkup getChoiceTabloKeyBoard(ChatBotSettings userSettings) {
+        List<Integer> groups = userSettings.getReminderHours();
 
         ButtonValue[] buttons = new ButtonValue[]{
-                new ButtonValue((reminderTime.contains(9) && reminderStarted) ? "✅ 9:00" : "9:00", "9")
-                , new ButtonValue((reminderTime.contains(10) && reminderStarted) ? "✅ 10:00" : "10:00", "10")
-                , new ButtonValue((reminderTime.contains(11) && reminderStarted) ? "✅ 11:00" : "11:00", "11")
-                , new ButtonValue((reminderTime.contains(12) && reminderStarted) ? "✅ 12:00" : "12:00", "12")
-                , new ButtonValue((reminderTime.contains(13) && reminderStarted) ? "✅ 13:00" : "13:00", "13")
-                , new ButtonValue((reminderTime.contains(14) && reminderStarted) ? "✅ 14:00" : "14:00", "14")
-                , new ButtonValue((reminderTime.contains(15) && reminderStarted) ? "✅ 15:00" : "15:00", "15")
-                , new ButtonValue((reminderTime.contains(16) && reminderStarted) ? "✅ 16:00" : "16:00", "16")
-                , new ButtonValue((reminderTime.contains(17) && reminderStarted) ? "✅ 17:00" : "17:00", "17")
-                , new ButtonValue((reminderTime.contains(18) && reminderStarted) ? "✅ 18:00" : "18:00", "18")
-                , new ButtonValue((!reminderStarted ? "✅ Вимкнути сповіщення" : "Вимкнути сповіщення"), "OffReminder")};
+                new ButtonValue((groups.contains(9)) ? "✅ КС-231" : "КС-231", "KS231")
+                , new ButtonValue((groups.contains(10)) ? "✅ КС-232" : "КС-232", "KS232")
+                , new ButtonValue((groups.contains(11)) ? "✅ КТ-23" : "КТ-23", "KN23")
+                , new ButtonValue((groups.contains(12)) ? "✅ КІ-23" : "КІ-23", "KI23")
+                , new ButtonValue((groups.contains(13)) ? "✅ КТ-23" : "КТ-23", "KT23")
+                , new ButtonValue((groups.contains(14)) ? "✅ КС-22" : "КС-22", "KS22")
+                , new ButtonValue((groups.contains(15)) ? "✅ КН-22" : "КН-22", "KN22")
+                , new ButtonValue((groups.contains(16)) ? "✅ КІ-22" : "КІ-22", "KI22")
+                , new ButtonValue((groups.contains(17)) ? "✅ КТ-22" : "КТ-22", "KT22")};
 
-        return KeyboardBuilder.getReminderKeyboard(buttons);
+        return KeyboardBuilder.getGroupsKeyboard(buttons);
     }
 
-    public static void sendChoiceReminderMessage(SendMessage sendMessage, ChatBotSettings userSettings) {
-        InlineKeyboardMarkup inlineKeyboardMarkup = getChoiceReminderKeyBoard(userSettings);
+    public static void sendChoiceGroupMessage(SendMessage sendMessage, ChatBotSettings userSettings) {
+        InlineKeyboardMarkup inlineKeyboardMarkup = getChoiceTabloKeyBoard(userSettings);
 
-        sendMessage.setText("Оберіть час сповіщень (не більше 5):");
+        sendMessage.setText("Оберіть группу:");
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
 
         new MyTelegramBot().sendNextMessage(sendMessage);

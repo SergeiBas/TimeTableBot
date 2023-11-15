@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageRe
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import telegrambot.button_menus.TabloMenu;
 import user_settings.ChatBotSettings;
 import user_settings.Utils;
 
@@ -26,6 +27,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         if (update.hasMessage()) {
             Message message = update.getMessage();
             Long chatId = update.getMessage().getChatId();
+            Utils.updateSettings(chatId);
 
             if (message.hasText()) {
                 String text = message.getText();
@@ -39,7 +41,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                         sendMessage.setText(Utils.getCurrentData(settings.get(chatId)));
                         sendNextMessage(sendMessage);
                     }
-//                    case "Налаштування" -> new SettingsKeyboardsUtils().sendChoiceOptionsMessage(sendMessage);
+                    case "Налаштування" -> new SettingsKeyboardsUtils().sendChoiceOptionsMessage(sendMessage);
                     case "/end" -> sendNextMessage(new TelegramBotUtils().sendEndMessage(chatId));
 //                    case "/settings" ->
 //                            sendNextMessage(new TelegramBotUtils().sendCurrentSettingsMessage(chatId, settings.get(chatId)));
@@ -53,6 +55,8 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             Long chatId = update.getCallbackQuery().getMessage().getChatId();
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
 
+            Utils.updateSettings(chatId);
+
             String inputQueryMessage = String.valueOf(update.getCallbackQuery().getData());
 
             SendMessage sendMessage = new SendMessage();
@@ -65,7 +69,19 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             AnswerCallbackQuery answerCallbackQuery = new AnswerCallbackQuery(update.getCallbackQuery().getId());
 
             switch (inputQueryMessage) {
+                case("group") -> TabloMenu.sendChoiceGroupMessage(sendMessage, settings.get(chatId));
+                case("KS231"), ("KS232"), ("KN23"), ("KI23"), ("KT23"), ("KS22"), ("KN22"), ("KI22"), ("KT22") ->{
 
+                    boolean isNewSetting = SettingsKeyboardsUtils.isThisNewSetting(inputQueryMessage.toString(), settings.get(chatId));
+                    new SettingsKeyboardsUtils().sendAnswerCallbackQuery(answerCallbackQuery, isNewSetting);
+
+                    if (isNewSetting) {
+                        settings.get(chatId).setGroup(inputQueryMessage);
+                        editMessage.setReplyMarkup(TabloMenu.getChoiceTabloKeyBoard(settings.get(chatId)));
+                        sendNextEditMessage(editMessage);
+                        Utils.writeUserSettings(settings.get(chatId));
+                    }
+                }
                 default -> {
                     sendMessage.setText("Немає обробки цієї кнопки: " + update.getCallbackQuery().getData());
                     sendNextMessage(sendMessage);

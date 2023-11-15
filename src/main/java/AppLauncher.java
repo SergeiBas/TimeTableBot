@@ -6,25 +6,20 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import java.io.*;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.Timer;
 
 import telegrambot.MyTelegramBot;
-import user_settings.ChatBotSettings;
 
 public class AppLauncher {
     public static Logger logger = LoggerFactory.getLogger(AppLauncher.class);
 
     public static void main(String[] args) throws IOException {
-        String url = "https://docs.google.com/spreadsheets/d/1sJNt4WL90Y2UdSfhDRzxUarP3jSwNk1gVchADY59k4U/edit#gid=92461680";
-        //Jsoup.connect(url).ignoreContentType(true).get().body().text();
 
-//        BufferedWriter writer = new BufferedWriter(new FileWriter("text1.txt"));
-//        writer.write(Jsoup.connect(url).ignoreContentType(true).get().body().text());
-//        writer.close();
+//        System.out.println(String.valueOf(new StringBuilder(readFileWithFormatting("TimeTables/"
+//                + new ChatBotSettings(123L).getDayOfWeek()
+//                + "/" + new ChatBotSettings(123L).getGroup() + ".txt"))));
 
-        //System.out.println(String.valueOf(LocalDate.now().getDayOfWeek()));
+        System.out.println(String.valueOf(LocalDate.now().getDayOfWeek()));
 
 
         //BasicConfigurator.configure();
@@ -37,7 +32,7 @@ public class AppLauncher {
             logger.error("Error occurred while registering the bot", e);
         }
 
-//        System.out.println("TimeTables11/" + new ChatBotSettings(123L).getDayOfWeek() + "/" + new ChatBotSettings(123L).getGroup() + ".txt");
+//        System.out.println("TimeTables/" + new ChatBotSettings(123L).getDayOfWeek() + "/" + new ChatBotSettings(123L).getGroup() + ".txt");
 //        StringBuilder result = new StringBuilder("");
 //        try(FileReader reader = new FileReader("TimeTables11/" + new ChatBotSettings(123L).getDayOfWeek() + "/" + new ChatBotSettings(123L).getGroup() + ".txt")){
 //            StringBuilder result = new StringBuilder(reader.toString());
@@ -71,9 +66,5 @@ public class AppLauncher {
 //        } catch (IOException e) {
 //            System.err.println("Ошибка при чтении файла: " + e.getMessage());
 //        }
-
-//        System.out.println(readFileWithFormatting("TimeTables11/"
-//                + new ChatBotSettings(123L).getDayOfWeek()
-//                + "/" + new ChatBotSettings(123L).getGroup() + ".txt"));
     }
 }
