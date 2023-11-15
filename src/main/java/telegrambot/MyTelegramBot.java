@@ -18,11 +18,8 @@ import java.util.*;
 public class MyTelegramBot extends TelegramLongPollingBot {
     public static Logger logger = LoggerFactory.getLogger(MyTelegramBot.class);
 
+    @Getter
     private static final Map<Long, ChatBotSettings> settings = new HashMap<>();
-
-    public static Map<Long, ChatBotSettings> getSettings() {
-        return settings;
-    }
 
     @Override
     public void onUpdateReceived(Update update) {

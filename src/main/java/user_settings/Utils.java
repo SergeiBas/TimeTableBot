@@ -1,22 +1,13 @@
 package user_settings;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.stream.JsonWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import telegrambot.MyTelegramBot;
-
 import java.io.*;
-import java.net.URL;
-import java.util.*;
 
 public class Utils {
     private Utils() {
     }
 
     public static String getCurrentData(ChatBotSettings userSettings) {
-        return String.valueOf(new StringBuilder(readFileWithFormatting("TimeTables11/"
+        return String.valueOf(new StringBuilder(readFileWithFormatting("TimeTables/"
                 + userSettings.getDayOfWeek()
                 + "/" + userSettings.getGroup() + ".txt")));
     }
